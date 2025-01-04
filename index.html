@@ -3,24 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel Data</title>
+    <title>My Excel Data Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Excel Data</h1>
-    <button id="loadDataBtn">Load Data</button>
-    <pre id="dataOutput"></pre>
+    <h1>Excel Data Display</h1>
+    <table id="data-table"></table>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
     <script>
-        document.getElementById('loadDataBtn').addEventListener('click', function() {
-            fetch('/data')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('dataOutput').textContent = JSON.stringify(data, null, 2);
-                })
-                .catch(error => {
-                    console.error('Error loading data:', error);
-                });
+        // Example of using XLSX library to load and display Excel data
+
+        // Assuming you have an 'xl_data.xlsx' file in the project folder
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        document.body.appendChild(fileInput);
+        
+        fileInput.addEventListener('change', event => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Assuming first sheet and first range of data is what we want
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+                    displayData(json);
+                };
+                reader.readAsArrayBuffer(file);
+            }
         });
+
+        function displayData(data) {
+            const table = document.getElementById('data-table');
+            table.innerHTML = '';
+
+            if (data.length > 0) {
+                const keys = Object.keys(data[0]);
+                const headerRow = document.createElement('tr');
+                keys.forEach(key => {
+                    const th = document.createElement('th');
+                    th.textContent = key;
+                    headerRow.appendChild(th);
+                });
+                table.appendChild(headerRow);
+
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    keys.forEach(key => {
+                        const td = document.createElement('td');
+                        td.textContent = row[key];
+                        tr.appendChild(td);
+                    });
+                    table.appendChild(tr);
+                });
+            }
+        }
     </script>
 </body>
 </html>
