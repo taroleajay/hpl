@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Data</title>
+</head>
+<body>
+    <h1>Excel Data</h1>
+    <button id="loadDataBtn">Load Data</button>
+    <pre id="dataOutput"></pre>
+
+    <script>
+        document.getElementById('loadDataBtn').addEventListener('click', function() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('dataOutput').textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    console.error('Error loading data:', error);
+                });
+        });
+    </script>
+</body>
+</html>
